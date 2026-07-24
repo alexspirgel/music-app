@@ -1,0 +1,113 @@
+@use 'sass:color';
+@use '@styles/abstracts/all' as *;
+
+#{$progress-bar-selector} {
+	$bar-area-selector: '.progress-bar__bar-area';
+	--seek-knob-left-percent: var(--seek-knob-percent, var(--progress-percent, 0%));
+	position: relative;
+	display: inline-block;
+	align-items: center;
+	column-gap: rem(6px);
+	&__bar-area {
+		position: relative;
+		width: rem(300px);
+		height: rem(3px);
+		outline: 0;
+		border-radius: rem(6px);
+		padding: rem(6px);
+		margin-top: rem(2px);
+		body[data-active-track] & {
+			cursor: pointer;
+			&:focus {
+				outline-width: 1px;
+				outline-style: solid;
+				outline-color: color.scale($color-white, $lightness: -10%);
+			}
+		}
+	}
+	&__bar {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		border-radius: rem(6px);
+		background-color: color.scale($color-white, $lightness: -10%);
+	}
+	&__seek-knob {
+		position: absolute;
+		top: 50%;
+		left: var(--seek-knob-left-percent);
+		transform: translate(-50%, -50%);
+		width: rem(14px);
+		height: rem(14px);
+		border: 0;
+		border-radius: 50%;
+		outline-width: 0;
+		outline-style: solid;
+		outline-color: color.scale($color-white, $lightness: -10%);
+		background-color: $color-accent-a;
+		opacity: 0;
+		z-index: 3;
+		transition-property: opacity;
+		transition-duration: 0.15s;
+		transition-timing-function: linear;
+		body[data-active-track] #{$bar-area-selector}:hover &,
+		body[data-active-track] #{$bar-area-selector}:active &,
+		body[data-active-track] #{$bar-area-selector}:focus & {
+			opacity: 1;
+		}
+	}
+	// &__seek-difference {
+	// 	--seek-difference: calc(var(--seek-knob-percent, var(--progress-percent, 0%)) - var(--progress-percent, 0%));
+	// 	position: absolute;
+	// 	top: 50%;
+	// 	left: calc(var(--seek-knob-left-percent) - (var(--seek-difference) / 2));
+	// 	transform: translate(-50%, -50%) scale(sign(var(--seek-difference)));
+	// 	width: abs(var(--seek-difference, 0%));
+	// 	height: 100%;
+	// 	background-image: repeating-linear-gradient(-45deg, color.scale($color-accent-a, $lightness: -10%) 0 rem(6px), color.scale($color-white, $lightness: -10%) 0 rem(12px));
+	// 	background-size: 18px 100%;
+	// 	background-position: 0 50%;
+	// 	background-repeat: repeat;
+	// 	animation-name: seek-difference;
+	// 	animation-duration: 1s;
+	// 	animation-timing-function: linear;
+	// 	animation-iteration-count: infinite;
+	// 	z-index: 2;
+	// }
+	// @keyframes seek-difference {
+	// 	100% {
+	// 		background-position: 18px 50%;
+	// 	}
+	// }
+	&__current-progress {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: var(--progress-percent, 0%);
+		height: 100%;
+		border-radius: rem(6px);
+		background-color: $color-accent-a;
+		z-index: 1;
+		transition-property: width;
+		transition-duration: 0.1s;
+		transition-timing-function: linear;
+		#{$progress-bar-selector}[data-instant-progress-bar-transition] & {
+			transition-property: none;
+		}
+	}
+	&__current-duration,
+	&__total-duration {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		@include open-sans(400);
+		font-size: rem(12px);
+		color: $color-white;
+	}
+	&__current-duration {
+		right: calc(100% + rem(8px));
+	}
+	&__total-duration {
+		left: calc(100% + rem(8px));
+	}
+}

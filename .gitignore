@@ -1,0 +1,5 @@
+.git/
+.vscode/
+model/
+
+node_modules

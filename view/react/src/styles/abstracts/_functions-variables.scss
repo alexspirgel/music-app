@@ -1,0 +1,63 @@
+@use 'sass:math';
+@use 'sass:map';
+@use 'sass:color';
+
+@function stripUnit($value) {
+	@return math.div($value, ($value * 0 + 1));
+}
+
+@function rem($px-value) {
+  @return math.div(stripUnit($px-value), stripUnit(16px)) * 1rem;
+}
+
+@function line-height($line-height, $font-size) {
+	@if (unit($line-height) == unit($font-size)) {
+		@return math.div($line-height, $font-size);
+	}
+	@else {
+		@error '$line-height and $font-size parameters must have the same unit type.';
+	}
+}
+
+$breakpoints: (
+	small:        rem(384px),
+	mobile-nav:   rem(425px),
+	small-medium: rem(576px),
+	medium:       rem(768px),
+	medium-large: rem(1024px),
+	large:        rem(1280px),
+	large-huge:   rem(1600px),
+	huge:         rem(1920px),
+);
+
+@function bp($breakpoint) {
+	@return map.get($breakpoints, $breakpoint);
+}
+
+$app-selector: '.app';
+$library-selector: '.library';
+$library-list-selector: '.library-list';
+$queue-selector: '.queue';
+$queue-item-selector: '.queue-item';
+$player-selector: '.player';
+$progress-bar-selector: '.progress-bar';
+
+$color-white: #ffffff;
+// $color-white-10: color.scale($color-white, $lightness: -10%);
+$color-black: #000000;
+// $color-black-10: color.scale($color-black, $lightness: 10%);
+
+$color-red: #ff6188;
+$color-orange: #fc9867;
+$color-yellow: #ffd866;
+$color-green: #a9dc76;
+$color-blue: #78dce8;
+$color-purple: #ab9df2;
+
+$color-accent-a: $color-red;
+// $color-accent-b: $color-blue;
+
+:root {
+	--player-bar-height: #{rem(80px)};
+	--color-accent-a: #{$color-accent-a};
+}

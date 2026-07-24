@@ -1,0 +1,22 @@
+@use 'sass:color';
+@use '@styles/abstracts/all' as *;
+
+.queue-sidebar {
+	$width: rem(400px);
+	$transition-duration: 0.25s;
+	$transition-timing-function: ease;
+	flex: 0 0 auto;
+	display: block;
+	width: 0;
+	height: calc(100vh - var(--player-bar-height));
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	background-color: color.scale($color-white, $lightness: -10%);
+	overflow-x: hidden;
+	overflow-y: auto;
+	transition: width 0.25s ease;
+	&[data-open] {
+		width: $width;
+	}
+}

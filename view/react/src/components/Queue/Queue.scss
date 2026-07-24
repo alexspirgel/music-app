@@ -1,0 +1,16 @@
+@use 'sass:color';
+@use '@styles/abstracts/all' as *;
+
+#{$queue-selector} {
+	display: block;
+	width: rem(400px);
+	height: calc(100vh - var(--player-bar-height));
+	background-color: color.scale($color-white, $lightness: -10%);
+	overflow-y: auto;
+	transition: width 0.25s ease;
+	&__list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+}

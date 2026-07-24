@@ -1,0 +1,16 @@
+{
+  "extends": "@tsconfig/node24/tsconfig.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "lib": ["DOM", "ES2022"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "paths": {
+      "@controller/*": ["./*"],
+      "@controller-types/*": ["./types/*"],
+      "@controller-classes/*": ["./classes/*"]
+    },
+    "verbatimModuleSyntax": true,
+  }
+}
