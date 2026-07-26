@@ -1,3 +1,7 @@
+[View the Demo](https://alexanderspirgel.com/music-app)
+
+To request credentials please reach out to me. The app needs to be private for copyright reasons.
+
 ## Tech Stack
 
 ### Front-End
@@ -23,3 +27,6 @@ Howler JS has many issues. I am working on my own solution to replace it. Some o
 - Howler JS controls stop working after spammed commands.
 
 Library and queue functionality are largely unfinished. I wanted to focus on the player itself for this project. The library and queue were built to be very basic, mostly to enable the player functionality.
+
+
+<!-- command to deploy react dist to github pages: `git subtree push --prefix view/react/dist origin gh-pages` -->
