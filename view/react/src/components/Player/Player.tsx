@@ -1,4 +1,5 @@
 import type QueueItemType from '@controller-classes/QueueItem';
+import type * as QueueItemTypes from '@controller-classes/QueueItem';
 import type * as ControllerPlayerTypes from '@controller-classes/Player';
 import type * as ControllerTrackListTypes from '@controller-classes/TrackList';
 import {useContext, useState, useEffect, useRef} from 'react';
@@ -8,6 +9,15 @@ import ProgressBar from '@components/ProgressBar/ProgressBar';
 import './Player.scss';
 
 const trackImageSources = [{width: 64}];
+let howlerLastAction = 0;
+
+const howlerThrottle = (actionCoolDown = 1000) => {
+	if (Date.now() - howlerLastAction < actionCoolDown) {
+		return true;
+	}
+	howlerLastAction = Date.now();
+	return false;
+};
 
 export default function Player() {
 
@@ -15,6 +25,7 @@ export default function Player() {
 	const {value: queueSidebarOpen, setter: setQueueSidebarOpen} = useContext(QueueSidebarOpenContext);
 
 	const [activeTrack, setActiveTrack] = useState<QueueItemType | undefined>(controllerApp.player.activeTrack);
+	const [activeTrackLoading, setActiveTrackLoading] = useState<boolean>(false);
 	const [playing, setPlaying] = useState<boolean>(controllerApp.player.playing);
 	const [volume, setVolume] = useState<number>(controllerApp.player.volume);
 	const [shuffled, setShuffled] = useState<boolean>(controllerApp.player.queue.shuffled);
@@ -69,8 +80,16 @@ export default function Player() {
 	};
 
 	const controllerOnSetActiveTrackHandler = (event:ControllerPlayerTypes.OnSetActiveTrackEvent) => {
+		activeTrack?.removeEventListener('onLoadingChange', controllerOnLoadingChangeHandler);
 		setActiveTrack(event.newValue);
+		activeTrack?.addEventListener('onLoadingChange', controllerOnLoadingChangeHandler);
 	};
+
+	const controllerOnLoadingChangeHandler = (event:QueueItemTypes.OnLoadingChangeEvent) => {
+		if (event.eventSource === activeTrack) {
+			setActiveTrackLoading(event.loading);
+		}
+	}
 
 	const controllerOnVolumeChangeHandler = (event:ControllerPlayerTypes.OnVolumeChangeEvent) => {
 		setVolume(event.value);
@@ -106,6 +125,20 @@ export default function Player() {
 		setQueueLength(controllerApp.player.queue.items.length);
 	};
 
+	const skipPreviousButtonHandler = () => {
+		if (howlerThrottle()) {
+			return;
+		}
+		controllerApp.player.skip('previous');
+	};
+
+	const skipNextButtonHandler = () => {
+		if (howlerThrottle()) {
+			return;
+		}
+		controllerApp.player.skip('next');
+	};
+
 	return (
 		<>
 			<div className='player'>
@@ -132,7 +165,7 @@ export default function Player() {
 								<path fillRule="evenodd" d="m5 8.24l-4.24-4.24 4.24-4.24"/>
 							</svg>
 						</button>
-						<button className='player__button-skip-previous' onClick={() => controllerApp.player.skip('previous')} aria-label="skip previous" disabled={!activeTrack}>
+						<button className='player__button-skip-previous' onClick={skipPreviousButtonHandler} aria-label="skip previous" disabled={!activeTrack}>
 							<svg className='player__button-skip-previous-icon' version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
 								<path fillRule="evenodd" d="m3 8l12-6.93v13.86z"/>
 								<path fillRule="evenodd" d="m1 1h1v14h-1z"/>
@@ -147,7 +180,7 @@ export default function Player() {
 								<path fillRule="evenodd" d="m6 1v14h-3v-14z"/>
 							</svg>
 						</button>
-						<button className='player__button-skip-next' onClick={() => controllerApp.player.skip('next')} aria-label="skip next" disabled={!activeTrack}>
+						<button className='player__button-skip-next' onClick={skipNextButtonHandler} aria-label="skip next" disabled={!activeTrack}>
 							<svg className='player__button-skip-next-icon' version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
 								<path fillRule="evenodd" d="m3 8l12-6.93v13.86z"/>
 								<path fillRule="evenodd" d="m1 1h1v14h-1z"/>
@@ -163,7 +196,7 @@ export default function Player() {
 							</svg>
 						</button>
 					</div>
-					<ProgressBar className='player__progress-bar' />
+					<ProgressBar className='player__progress-bar' loading={activeTrackLoading} />
 				</div>
 				<div className='player__utility-area'>
 					<button className='player__button-volume-toggle' onClick={() => controllerApp.player.toggleMute()} aria-label={isMuted ? 'unmute' : 'mute'}>

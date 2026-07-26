@@ -132,7 +132,7 @@ const TrackImage = ({track, sources, alt, loading = 'eager', pictureClass, imgCl
 				}
 			}
 		}
-		return '/missing-album-art.svg';
+		return 'missing-album-art.svg';
 	};
 
 	return (

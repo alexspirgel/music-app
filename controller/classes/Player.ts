@@ -157,6 +157,7 @@ export default class Player extends EventManager {
 			newActiveTrack.stop();
 			newActiveTrack.addEventListener('onEnd', this.activeTrackOnEndHandler, {prepend: true});
 		}
+		Howler.stop();
 		this.#activeTrack = newActiveTrack;
 		if (oldActiveTrack) {
 			oldActiveTrack.removeEventListener('onEnd', this.activeTrackOnEndHandler, {prepend: true});

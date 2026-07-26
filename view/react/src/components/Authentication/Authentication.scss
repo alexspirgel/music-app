@@ -1,0 +1,51 @@
+@use 'sass:color';
+@use '@styles/abstracts/all' as *;
+
+.authentication {
+	position: absolute;
+	margin:rem(10px);
+	&__message {
+		padding: rem(8px);
+		@include open-sans(700);
+		font-size: rem(14px);
+		&[data-type="success"] {
+			color: $color-green;
+		}
+		&[data-type="error"] {
+			color: $color-red;
+		}
+	}
+	&__input-row {
+		margin-bottom: rem(10px);
+	}
+	label {
+		margin-right: rem(4px);
+		@include open-sans(400);
+		font-size: rem(18px);
+		color: color.scale($color-black, $lightness: 10%);
+	}
+	input {
+		border: 1px solid color.scale($color-white, $lightness: -30%);
+		border-radius: rem(3px);
+		padding: rem(4px);
+		@include open-sans(400);
+		font-size: rem(16px);
+		background-color: color.scale($color-white, $lightness: -10%);
+	}
+	button {
+		border: 1px solid $color-accent-a;
+		border-radius: rem(3px);
+		padding: rem(4px) rem(8px);
+		@include open-sans(400);
+		font-size: rem(16px);
+		background-color: transparent;
+		cursor: pointer;
+		transition-property: color, background-color;
+		transition-duration: 0.25s;
+		&:hover,
+		&:focus {
+			color: $color-white;
+			background-color: $color-accent-a;
+		}
+	}
+}

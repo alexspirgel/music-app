@@ -1,12 +1,16 @@
 import type TrackListItem from '@controller-classes/TrackListItem';
 import type QueueItem from '@controller-classes/QueueItem';
 import {useContext} from 'react';
-import {ControllerAppContext} from '@components/App/AppContexts';
+import {ControllerAppContext, AuthenticationStatusContext} from '@components/App/AppContexts';
+import TrackImage from '@components/TrackImage/TrackImage';
 import './Library.scss';
+
+const trackImageSources = [{width: 64}];
 
 export default function Library() {
 
 	const {value: controllerApp} = useContext(ControllerAppContext);
+	const {value: authenticationStatus} = useContext(AuthenticationStatusContext);
 
 	const getItemListIdFromEvent = (event:any):string => {
 		return event.target.closest('li').getAttribute('data-list-id');
@@ -47,17 +51,27 @@ export default function Library() {
 	};
 
 	const libraryItems = controllerApp.library.trackList.items.map((libraryItem:TrackListItem) => {
-		return <li key={libraryItem.listId} data-list-id={libraryItem.listId}>
-			<button onClick={libraryItemPlayClickHandler}>▶</button>
-			<span>{libraryItem.track.tags.title}</span>
-			<button onClick={libraryItemPlayNextClickHandler}>play next</button>
-			<button onClick={addToQueueClickHandler}>add to queue</button>
+		return <li className='library__item' key={libraryItem.listId} data-list-id={libraryItem.listId}>
+			<div className='library__item-image-area'>
+				<TrackImage
+					pictureClass='library__item-image'
+					track={libraryItem.track}
+					alt={libraryItem.track.tags.title}
+					sources={trackImageSources}
+				/>
+				<button className='library__item-play' onClick={libraryItemPlayClickHandler}><span>▶</span></button>
+			</div>
+			<span className='library__item-title'>{libraryItem.track.tags.title}</span>
+			<div className='library__item-additional-actions'>
+				<button className='library__item-play-next' onClick={libraryItemPlayNextClickHandler}>play next</button>
+				<button className='library__item-add-to-queue' onClick={addToQueueClickHandler}>add to queue</button>
+			</div>
 		</li>
 	});
 
 	return (
 		<div className='library'>
-			<ul className='library__items'>{libraryItems}</ul>
+			{authenticationStatus ? <ul className='library__items'>{libraryItems}</ul> : null}
 		</div>
 	);
 

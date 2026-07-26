@@ -3,6 +3,7 @@
 
 #{$queue-selector} {
 	display: block;
+	position: relative;
 	width: rem(400px);
 	height: calc(100vh - var(--player-bar-height));
 	background-color: color.scale($color-white, $lightness: -10%);
@@ -12,5 +13,17 @@
 		margin: 0;
 		padding: 0;
 		list-style: none;
+	}
+	&__empty-message {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		height: 100%;
+	}
+	&__empty-message-text {
+		@include open-sans(400);
+		font-size: rem(16px);
+		color: color.scale($color-black, $lightness: 50%);
 	}
 }

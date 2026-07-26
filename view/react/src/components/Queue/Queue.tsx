@@ -44,13 +44,26 @@ export default function Queue() {
 		}
 	};
 
+	const renderQueueList = () => {
+		if (queueItems.length > 0) {
+			return (
+				<Reorder.Group className='queue__list' values={queueItems} as='ol' axis='y' onReorder={onReorderHandler}>
+					{queueItems.map(item => (
+						<QueueItem key={item.listId} queueItem={item} setActiveReorderingItem={setActiveReorderingItem} />
+					))}
+				</Reorder.Group>
+			);
+		}
+		else {
+			return (<div className='queue__empty-message'>
+				<span className='queue__empty-message-text'>The queue is empty.</span>
+			</div>);
+		}
+	};
+
 	return (
 		<div className='queue'>
-			<Reorder.Group className='queue__list' values={queueItems} as='ol' axis='y' onReorder={onReorderHandler}>
-				{queueItems.map(item => (
-					<QueueItem key={item.listId} queueItem={item} setActiveReorderingItem={setActiveReorderingItem} />
-				))}
-			</Reorder.Group>
+			{renderQueueList()}
 		</div>
 	);
 

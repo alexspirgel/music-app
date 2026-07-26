@@ -46,9 +46,10 @@ let updatingPlaybackProgressId:number | undefined;
 
 type Properties = {
 	className?:string;
+	loading?:boolean;
 };
 
-export default function ProgressBar({className}:Properties) {
+export default function ProgressBar({className, loading}:Properties) {
 	if (className) {
 		className = className + ' progress-bar';
 	}
@@ -232,7 +233,7 @@ export default function ProgressBar({className}:Properties) {
 	};
 
 	return (
-		<div className={className} ref={componentElementRef}>
+		<div className={className} ref={componentElementRef} data-loading={loading ? '' : null}>
 			<Duration className='progress-bar__current-duration' controllerDuration={activeTrackCurrentDuration} unitSelection={durationUnitSelection} formattingOptionsOverrides={durationFormattingOptions} />
 			<div className="progress-bar__bar-area" ref={barAreaElementRef} onMouseDown={barMouseDownHandler} onKeyDown={barKeyDownHandler} tabIndex={activeTrack ? 0 : -1}>
 				<div className="progress-bar__bar">

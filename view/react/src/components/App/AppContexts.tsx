@@ -33,3 +33,20 @@ export const QueueSidebarOpenContextProvider = ({children}:{children:ReactNode})
 		</QueueSidebarOpenContext>
 	);
 };
+
+type AuthenticationStatusContextType = {
+	value:boolean;
+	setter:(value:boolean) => void;
+};
+export const AuthenticationStatusContext = createContext<AuthenticationStatusContextType>({value: false, setter: () => {}});
+export const AuthenticationStatusProvider = ({children}:{children:ReactNode}) => {
+	const [authenticationStatus, setAuthenticationStatus] = useState<boolean>(false);
+	return (
+		<AuthenticationStatusContext value={{
+			value: authenticationStatus,
+			setter: setAuthenticationStatus,
+		}}>
+			{children}
+		</AuthenticationStatusContext>
+	);
+};

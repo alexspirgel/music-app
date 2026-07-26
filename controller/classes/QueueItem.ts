@@ -1,6 +1,7 @@
 import type * as EventManagerTypes from '@controller-classes/EventManager';
 import type * as TrackListTypes from '@controller-classes/TrackList';
 import type TrackListType from '@controller-classes/TrackList';
+import * as apiHelpers from '@controller/utilities/apiHelpers';
 import TrackListItem from '@controller-classes/TrackListItem';
 import {Howl} from 'howler';
 
@@ -12,7 +13,11 @@ type QueueItemEvent = EventManagerTypes.EventBase & {
 export type OnPlayingChangeEvent = QueueItemEvent & {
 	eventId:'onPlayingChange';
 	playing:boolean;
-}
+};
+export type OnLoadingChangeEvent = QueueItemEvent & {
+	eventId:'onLoadingChange';
+	loading:boolean;
+};
 type QueueItemSoundEvent = QueueItemEvent & {
 	sound?:Howl;
 };
@@ -23,9 +28,10 @@ export type OnEndEvent = QueueItemSoundEvent & {eventId:'onEnd';};
 export default class QueueItem extends TrackListItem {
 
 	soundHTML5?:Howl;
-	selectedSound?:Howl;
 	#playing:boolean = false;
 	#originListId?:string;
+	updateSoundTimeout?:number;
+	#loading:boolean = false;
 
 	/**
 	 * Constructs a queue item.
@@ -59,42 +65,80 @@ export default class QueueItem extends TrackListItem {
 	 * @returns A selected sound if one is available.
 	 */
 	get sound():Howl | undefined {
-		return this.selectSound();
+		return this.soundHTML5;
 	}
 
-	/**
-	 * Select a sound based on load state. Prefer web audio.
-	 * @returns A Howl sound if one is available.
-	 */
-	selectSound():Howl | undefined {
-		if (!this.selectedSound) {
-			if (this.soundHTML5) {
-				this.selectedSound = this.soundHTML5;
+	createSound = async () => {
+		this.loading = true;
+		const apiData = await apiHelpers.getTrackAPIData(this.track);
+		const createdSound = new Howl({
+			src: [apiData.url],
+			html5: true,
+			preload: 'metadata',
+		});
+		// console.log(createdSound);
+		createdSound.on('end', () => {
+			this.soundOnEndHandler(createdSound);
+		});
+		createdSound.on('load', () => {
+			this.loading = false;
+			// console.log('sound loaded');
+			// console.log('is playing', this.playing);
+			if (this.sound === createdSound && this.playing) {
+				createdSound.play();
 			}
-			else {
-				this.selectedSound = undefined;
-			}
-		}
-		return this.selectedSound;
-	}
+		});
+		createdSound.on('loaderror', (_unusedId, error) => {
+			console.error('loaderror', createdSound, error);
+			this.updateSound();
+		});
+		createdSound.on('playerror', (_unusedId, error) => {
+			console.error('playerror', createdSound, error);
+			this.updateSound();
+		});
+		return {
+			sound: createdSound,
+			expiresIn: apiData.expires_in * 1000,
+		};
+	};
 
 	/**
 	 * Initializes web audio and HTML5 sounds.
 	 */
-	initializeSound():void {
+	initializeSound = async ():Promise<void> => {
 		if (!this.soundHTML5) {
-			this.soundHTML5 = new Howl({
-				src: [this.track.fileUrl],
-				html5: true,
-				preload: 'metadata',
-				onend: () => this.soundOnEndHandler(this.soundHTML5),
-				onloaderror: (_unusedId, error) => {
-					console.error('onloaderror', this.soundHTML5, error);
-				},
-				onplayerror : (_unusedId, error) => {
-					console.error('onplayerror', this.soundHTML5, error);
-				},
-			});
+			const createdSound = await this.createSound();
+			this.soundHTML5 = createdSound.sound;
+			clearTimeout(this.updateSoundTimeout);
+			this.updateSoundTimeout = setTimeout(this.updateSound, createdSound.expiresIn);
+		}
+	}
+
+	updateSound = async ():Promise<void> => {
+		const oldSound = this.soundHTML5;
+		const oldSeek = oldSound?.seek() || 0;
+		const createdSound = await this.createSound();
+		createdSound.sound.seek(oldSeek);
+		this.soundHTML5 = createdSound.sound;
+		clearTimeout(this.updateSoundTimeout);
+		this.updateSoundTimeout = setTimeout(this.updateSound, createdSound.expiresIn);
+		oldSound?.stop();
+		oldSound?.unload();
+	}
+
+	get loading():boolean {
+		return this.#loading;
+	}
+
+	set loading (value:boolean) {
+		if (value !== this.loading) {
+			this.#loading = value;
+			const onLoadingChangeEvent:OnLoadingChangeEvent = {
+				eventId: 'onLoadingChange',
+				eventSource: this,
+				loading: value,
+			};
+			this.dispatchEvent('onLoadingChange', [onLoadingChangeEvent]);
 		}
 	}
 
@@ -124,7 +168,7 @@ export default class QueueItem extends TrackListItem {
 	 * @returns The current seek percent (represented as a decimal between and including 0 and 1) or undefined if there is no selected sound.
 	 */
 	getSeekPercent():number | undefined {
-		if (this.selectedSound) {
+		if (this.soundHTML5) {
 			const seekMilliseconds:number = this.seek() || 0;
 			const percent:number = seekMilliseconds / this.track.duration;
 			return Math.min(Math.max(percent, 0), 1);
@@ -137,11 +181,11 @@ export default class QueueItem extends TrackListItem {
 	 * @returns The current seek in milliseconds or undefined if no sound is selected.
 	 */
 	seek(duration?:number):number | undefined {
-		if (this.selectedSound) {
-			const currentDurationMilliseconds:number = this.selectedSound.seek() * 1000;
+		if (this.soundHTML5) {
+			const currentDurationMilliseconds:number = this.soundHTML5.seek() * 1000;
 			if (typeof duration === 'number') {
 				const durationSeconds = duration / 1000;
-				this.selectedSound.seek(durationSeconds);
+				this.soundHTML5.seek(durationSeconds);
 			}
 			return currentDurationMilliseconds;
 		}
@@ -154,7 +198,7 @@ export default class QueueItem extends TrackListItem {
 	 * @returns The duration in milliseconds the seek was set to or undefined if there is no selected sound.
 	 */
 	setSeekPercent(percent:number):number | undefined {
-		if (this.selectedSound) {
+		if (this.soundHTML5) {
 			percent = Math.min(Math.max(percent, 0), 1);
 			const durationMilliseconds:number = this.getDurationFromPercent(percent);
 			this.seek(durationMilliseconds);
@@ -190,9 +234,9 @@ export default class QueueItem extends TrackListItem {
 	 * Plays the sound.
 	 */
 	play = () => {
+		this.playing = true;
 		if (this.sound) {
 			this.sound.play();
-			this.playing = true;
 		}
 	};
 
@@ -200,8 +244,8 @@ export default class QueueItem extends TrackListItem {
 	 * Pauses the sound.
 	 */
 	pause = () => {
-		this.selectedSound?.pause();
 		this.playing = false;
+		this.soundHTML5?.pause();
 	};
 
 	/**
@@ -210,7 +254,6 @@ export default class QueueItem extends TrackListItem {
 	stop = () => {
 		this.soundHTML5?.stop();
 		this.playing = false;
-		this.selectedSound = undefined;
 	};
 
 	/**
