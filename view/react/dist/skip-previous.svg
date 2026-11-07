@@ -1,9 +1,0 @@
-<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
-	<style>
-		.s0 { fill: #ffffff } 
-	</style>
-	<g id="Skip Backward">
-		<path id="Triangle" fill-rule="evenodd" class="s0" d="m3 8l12-6.93v13.86z"/>
-		<path id="Line" fill-rule="evenodd" class="s0" d="m1 1h1v14h-1z"/>
-	</g>
-</svg>
