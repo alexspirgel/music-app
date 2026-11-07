@@ -277,6 +277,7 @@ export default class Player extends EventManager {
 				item.destroySound();
 			}
 		}
+		// console.log('preloadedQueueItems', preloadedQueueItems);
 		return preloadedQueueItems;
 	}
 

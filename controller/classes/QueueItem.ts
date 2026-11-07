@@ -28,6 +28,7 @@ export type OnEndEvent = QueueItemSoundEvent & {eventId:'onEnd';};
 export default class QueueItem extends TrackListItem {
 
 	soundHTML5?:Howl;
+	soundInitializing:boolean
 	#playing:boolean = false;
 	#originListId?:string;
 	updateSoundTimeout?:number;
@@ -40,6 +41,7 @@ export default class QueueItem extends TrackListItem {
 	 */
 	constructor(trackThing:TrackListTypes.TrackThing, parentList:TrackListType) {
 		super(trackThing, parentList);
+		this.soundInitializing = false;
 	}
 
 	/**
@@ -71,10 +73,11 @@ export default class QueueItem extends TrackListItem {
 	createSound = async () => {
 		this.loading = true;
 		const apiData = await apiHelpers.getTrackAPIData(this.track);
+		// console.log(apiData);
 		const createdSound = new Howl({
 			src: [apiData.url],
 			html5: true,
-			preload: 'metadata',
+			preload: true,
 		});
 		// console.log(createdSound);
 		createdSound.on('end', () => {
@@ -106,11 +109,13 @@ export default class QueueItem extends TrackListItem {
 	 * Initializes web audio and HTML5 sounds.
 	 */
 	initializeSound = async ():Promise<void> => {
-		if (!this.soundHTML5) {
+		if (!this.soundHTML5 && !this.soundInitializing) {
+			this.soundInitializing = true;
 			const createdSound = await this.createSound();
 			this.soundHTML5 = createdSound.sound;
 			clearTimeout(this.updateSoundTimeout);
 			this.updateSoundTimeout = setTimeout(this.updateSound, createdSound.expiresIn);
+			this.soundInitializing = false;
 		}
 	}
 
