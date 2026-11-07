@@ -37,4 +37,4 @@ Navigate to `./view/react` and run `npm install`, then run `npm run dev` to spin
 
 ### Deploying
 
-The command to deploy react dist to github pages: `git subtree push --prefix view/react/dist origin gh-pages`.
+Navigate to `./view/react` and run `npm run build`, then `npm run deploy`.
