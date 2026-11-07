@@ -29,4 +29,12 @@ Howler JS has many issues. I am working on my own solution to replace it. Some o
 Library and queue functionality are largely unfinished. I wanted to focus on the player itself for this project. The library and queue were built to be very basic, mostly to enable the player functionality.
 
 
-<!-- command to deploy react dist to github pages: `git subtree push --prefix view/react/dist origin gh-pages` -->
+## Development Notes
+
+Navigate to `./controller` and run `npm install`.
+
+Navigate to `./view/react` and run `npm install`, then run `npm run dev` to spin up a local development server.
+
+### Deploying
+
+The command to deploy react dist to github pages: `git subtree push --prefix view/react/dist origin gh-pages`.
