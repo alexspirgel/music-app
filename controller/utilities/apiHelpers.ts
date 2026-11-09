@@ -11,7 +11,7 @@ let validPassword:string | undefined;
 export const apiRequest = async (username:string, password:string, path:string):Promise<APIResponse> => {
 	const authentication = btoa(`${username}:${password}`);
 	const response = await fetch(
-		`https://f3rbb8ak38.execute-api.us-east-1.amazonaws.com/presigned-url?key=${encodeURIComponent(path)}`,
+		`https://0ew9m2x42a.execute-api.us-east-1.amazonaws.com/presigned-url?key=${encodeURIComponent(path)}`,
 		{
 			headers: {
 				Authorization: `Basic ${authentication}`,
